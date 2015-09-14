@@ -154,12 +154,17 @@ var Engine = (function(global) {
         player.render();
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
+    /* This function resets the player to its default position, and also
+     * initializes the array of enemies and sets them to their defaults
      */
     function reset() {
-        player.setToHomePosition();
+        // reset player
+        player.reset();
+
+        // reset enemies
+        allEnemies.forEach(function(enemy) {
+            enemy.reset();
+        });
     }
 
     /* Go ahead and load all of the images we know we're going to need to
