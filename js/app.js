@@ -20,7 +20,7 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     this.x += this.increment * dt;
 
-    // if enemy went offscreen right, reset it
+    // if enemy went offscreen right, reset it to offscreen left
     if (this.x > numCols * colWidth) {
         this.reset();
     }
@@ -28,6 +28,9 @@ Enemy.prototype.update = function(dt) {
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
+
+    // compute enemy's y coordinate based on its row,
+    // subtracting a little fudge factor to center it vertically
     this.y = this.row * rowHeight - rowHeight/4;
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -37,13 +40,35 @@ Enemy.prototype.reset = function () {
 
     // enemy goes on a random row from 1-3
     this.row = Math.floor( Math.random() * 3 + 1 );
-    console.log("Enemy row = " + this.row);
+    //console.log("Enemy row = " + this.row);
 
     // enemy starts at 200 pixels offscreen left
     this.x = -200;
 
     // enemy speed is determined randomly
-    this.increment = 50 + (Math.random() * 400);
+    this.increment = 150 + (Math.random() * 400);
+}
+
+Enemy.prototype.checkCollision = function(row,col) {
+
+    // compute row and column of this enemy's head and tail
+    // make them be 1/3 of thwe way intoa ocolum before
+    // a collision is detected
+    var enemyRow = this.row;
+    var enemyTailCol = Math.floor( (this.x - colWidth/3) / colWidth );
+    var enemyHeadCol = enemyTailCol + 1;
+
+    // see if row and column are the same as this enemy's
+    if (row == enemyRow && (col == enemyHeadCol || col == enemyTailCol + 1)) {
+        //console.log("COLLISION!");
+        //console.log('enemy paint position is x=' + this.x);
+        //console.log('enemy head is in [' + enemyRow + ',' + enemyHeadCol + ']');
+        //console.log('enemy tail is in [' + enemyRow + ',' + enemyTailCol + ']');
+        //console.log('player is in cell [' + row + ',' + col + ']');
+        return true;
+    }
+
+    return false;
 }
 
 // Now write your own player class
@@ -60,8 +85,19 @@ var Player = function() {
 };
 
 // Update the player's position
+// and check for collision with an enemy
 Player.prototype.update = function() {
 
+    // we don't need to update position since it was
+    // already done in handleInput()
+
+    // see if any enemies are in the same grid square
+    // as the player
+    allEnemies.forEach(function(enemy) {
+        if (enemy.checkCollision(player.row, player.col)) {
+            player.reset();
+        }
+    });
 };
 
 // draw the player on the screen
@@ -103,13 +139,14 @@ Player.prototype.handleInput = function(keyCode) {
             if (this.row > numRows - 1) {
                 this.row = numRows - 1;
             }
+            break;
         }
     }
 };
 
 // reset the player
 Player.prototype.reset = function() {
-    player.row = 4;
+    player.row = 5;
     player.col = 2;
 };
 
