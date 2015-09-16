@@ -7,5 +7,3 @@ var numRows = 6;
 var numCols = 5;
 var rowHeight = 83;
 var colWidth = 101;
-
-/*
