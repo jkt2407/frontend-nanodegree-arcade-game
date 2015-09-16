@@ -1,3 +1,6 @@
+////////////////////////////////////////////////////////////////////
+// Enemy class
+//
 // Enemies our player must avoid
 var Enemy = function() {
     // Variables applied to each of our instances go here,
@@ -71,9 +74,10 @@ Enemy.prototype.checkCollision = function(row,col) {
     return false;
 }
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+////////////////////////////////////////////////////////////////////
+// Player class
+//
+// Our hero
 var Player = function() {
 
     // the array of images/sprites for the player
@@ -111,8 +115,7 @@ Player.prototype.update = function() {
 };
 
 // draw the player on the screen
-// note that we use a fudge factor to
-// center the player vertically
+// note that we use a fudge factor to center the player vertically
 Player.prototype.render = function() {
     this.x = this.col * colWidth;
     this.y = this.row * rowHeight - 12;
@@ -173,16 +176,111 @@ Player.prototype.reset = function() {
     player.col = 2;
 };
 
+////////////////////////////////////////////////////////////////////
+// Gem class
+//
+// Gems are created at random and placed on the roadway to be collected
+var Gem = function() {
+
+    // init row and col
+    this.row = 0;
+    this.col = 0;
+
+    // set gem type randomly 0, 1 or 2
+    this.gemType =  Math.floor( Math.random() * gemTypes );
+
+    // pick an an image and point value for this gem
+    switch (this.gemType) {
+        default:
+        case 0: {
+            this.sprite = 'images/gem-orange.png';
+            this.points = 100;
+            break;
+        }
+        case 1: {
+            this.sprite = 'images/gem-green.png';
+            this.points = 200;
+            break;
+        }
+        case 2: {
+            this.sprite = 'images/gem-blue.png';
+            this.points = 500;
+            break;
+        }
+    }
+
+    // pick a random row and column for the gem
+    // (make sure it's unoccupied - we'll try 10 times to find an
+    // empty grid space)
+    var gemPlaced = false;
+    for (var i = 0; i < 10; i++) {
+
+        // pick a random row from 1 to 3
+        var gemRow = Math.floor( Math.random() * 3 + 1 );
+
+        // pick a random col from 0 to numCols - 1
+        var gemCol = Math.floor( Math.random() * numCols );
+
+        // is it an empty grid slot? if so, claim it and stop looking
+        if (!this.checkCollision(gemRow, gemCol)) {
+            this.row = gemRow;
+            this.col = gemCol;
+            allGems.push(this);
+            gemPlaced = true;
+            break;
+        }
+    }
+
+    // if we didn't place the gem after 10 tries, return null
+    if (!gemPlaced) {
+        return null;
+    }
+};
+
+// draw the gem on the screen
+// note that we use a fudge factor to center the player vertically
+Gem.prototype.render = function() {
+    this.x = this.col * colWidth;
+    this.y = this.row * rowHeight - 12;
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+// return true if there's a gem at this row and column
+Gem.prototype.checkCollision = function(row,col) {
+
+    // iterate through array of gems looking for a match
+    allGems.forEach(function(gem) {
+        if (gem.row == row && gem.col == col) {
+            return true;
+        }
+    });
+    return false;
+};
+
+////////////////////////////////////////////////////////////////////
+// Initialization
+//
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
-allEnemies = [];
+var allEnemies = [];
 allEnemies[0] = new Enemy();
 allEnemies[1] = new Enemy();
 allEnemies[2] = new Enemy();    // video shows a max of three enemies
 
 // Place the player object in a variable called player
-player = new Player();
+var player = new Player();
 
+// add a couple of gems for the hell of it
+var allGems = [];
+var foo = new Gem();
+foo = new Gem();
+foo = new Gem();
+foo = new Gem();
+
+
+////////////////////////////////////////////////////////////////////
+// Utilities
+//
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
