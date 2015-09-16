@@ -1,14 +1,4 @@
 /* Resources.js
- * Keep global constants in one place, rather then sprinkle "magic numbers"
- * throughout the code
- */
-// global constants
-var numRows = 6;
-var numCols = 5;
-var rowHeight = 83;
-var colWidth = 101;
-
-/*
  * This is simple an image loading utility. It eases the process of loading
  * image files so that they can be used within your game. It also includes
  * a simple "caching" layer so it will reuse cached images if you attempt
