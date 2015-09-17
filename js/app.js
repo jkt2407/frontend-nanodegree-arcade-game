@@ -52,16 +52,17 @@ Enemy.prototype.reset = function () {
     this.increment = 150 + (Math.random() * 400);
 }
 
+// return true if input row and col contain an Enemy
 Enemy.prototype.checkCollision = function(row,col) {
 
     // compute row and column of this enemy's head and tail
-    // make them be 1/3 of thwe way intoa ocolum before
+    // make them be 1/3 of the way into a column before
     // a collision is detected
     var enemyRow = this.row;
     var enemyTailCol = Math.floor( (this.x - colWidth/3) / colWidth );
     var enemyHeadCol = enemyTailCol + 1;
 
-    // see if row and column are the same as this enemy's
+    // see if input row and column are the same as this enemy's
     if (row == enemyRow && (col == enemyHeadCol || col == enemyTailCol + 1)) {
         //console.log("COLLISION!");
         //console.log('enemy paint position is x=' + this.x);
@@ -98,20 +99,27 @@ var Player = function() {
     this.col = 0;
 };
 
-// Update the player's position
-// and check for collision with an enemy
-Player.prototype.update = function() {
+// log this player
+Player.prototype.log = function() {
+    console.log('player ' +
+            ' row=' + this.row +
+            ' col=' + this.col +
+            ' markedForDeletion=' + this.markedForDeletion
+    );
+};
 
-    // we don't need to update position since it was
-    // already done in handleInput()
+
+// Update the player's position
+Player.prototype.update = function(dt) {
 
     // see if any enemies are in the same grid square
-    // as the player
-    allEnemies.forEach(function(enemy) {
-        if (enemy.checkCollision(player.row, player.col)) {
-            player.reset();
+    // as the player; if so, player is dead (reset him)
+    for (var i=0; i < allEnemies.length; i++) {
+        var enemy = allEnemies[i];
+        if (enemy.checkCollision(this.row, this.col)) {
+            this.reset();
         }
-    });
+    }
 };
 
 // draw the player on the screen
@@ -126,14 +134,20 @@ Player.prototype.render = function() {
 Player.prototype.handleInput = function(keyCode) {
     console.log(keyCode);
     switch(keyCode) {
-        // iterate thruogh all the sprite images
+        // pause and invoke the JS debugger
+        case 'escape': {
+            console.log("escape");
+            debugger;
+            break;
+        }
+        // toggle through the various player skins
         case 'home': {
             this.spriteIndex++;
             if (this.spriteIndex > 4) {
                 this.spriteIndex = 0;
             }
             player.render();
-            break
+            break;
         }
         // move player one square left
         case 'left': {
@@ -172,8 +186,59 @@ Player.prototype.handleInput = function(keyCode) {
 
 // reset the player
 Player.prototype.reset = function() {
-    player.row = 5;
-    player.col = 2;
+    player.row = playerHomeRow;
+    player.col = playerHomeCol;
+};
+
+// global variable is a countdown timer for when next gem is added
+var gemCreationTimer = firstGemTimeout;
+
+// if it's time, add a new gem to the game
+Player.prototype.addNewGem = function(dt) {
+    // decrement our master timer;
+    // if we timed out, create a new gem
+    gemCreationTimer -= dt;
+    if (gemCreationTimer < 0) {
+        console.log('Master timer elapsed -- creating a new gem')
+        var gem = new Gem();    // the constructor does all the work
+    }
+}
+// remove all gems from the array that are marked for deletion
+Player.prototype.removeOldGems = function() {
+
+    // see if any gems are marked for deletion
+    var deletionPending = false;
+    for (var i=0; i < allGems.length; i++) {
+        if (allGems[i].markedForDeletion) {
+            deletionPending = true;
+            break;
+        }
+    }
+    // if no deletions pending, we are done
+    if (!deletionPending) {
+        return;
+    }
+
+    // make a copy of the current gems array
+    var oldArray = allGems.slice(0);
+    console.log("We are about to remove those gems marked for deletion");
+    logGemArray(oldArray);
+    logGemArray(allGems);
+
+    // clear allGems and copy all the objets to it that aren't
+    // marked for deletion
+    console.log("Clear out allGems array");
+    allGems = [];
+    logGemArray(allGems);
+    for (var j=0; j < oldArray.length; j++) {
+        var gem = oldArray.shift();
+        if (!gem.markedForDeletion) {
+            allGems.push(gem);
+        }
+    }
+    console.log("Finished removing gems marked for deletion.");
+    logGemArray(allGems);
+
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -182,9 +247,22 @@ Player.prototype.reset = function() {
 // Gems are created at random and placed on the roadway to be collected
 var Gem = function() {
 
-    // init row and col
+    console.log('Running Gem constructor.')
+
+    // if we already have our maximium number of gems, do nothing
+    if (allGems.length >= maxGems) {
+        console.log('Already have ' + allGems.length + ' gems, no need for more.');
+        return null;
+    }
+
+    // set master gem timeout for next gem to appear
+    gemCreationTimer = Math.random() * (gemBornMax - gemBornMin) + gemBornMin;
+    console.log('Next gem will appear in ' + gemCreationTimer + ' seconds');
+
+    // init row and col, clear delete flag
     this.row = 0;
     this.col = 0;
+    this.markedForDeletion = false;
 
     // set gem type randomly 0, 1 or 2
     this.gemType =  Math.floor( Math.random() * gemTypes );
@@ -210,8 +288,10 @@ var Gem = function() {
     }
 
     // pick a random row and column for the gem
-    // (make sure it's unoccupied - we'll try 10 times to find an
-    // empty grid space)
+    // (we are not allowing multpile gems to occupy the
+    // same grid slot, so we must make sure the grid slot
+    // is unoccupied - we'll try 10 times to find an empty
+    // grid slot.)
     var gemPlaced = false;
     for (var i = 0; i < 10; i++) {
 
@@ -220,44 +300,120 @@ var Gem = function() {
 
         // pick a random col from 0 to numCols - 1
         var gemCol = Math.floor( Math.random() * numCols );
+        console.log("We will place the new gem at row "
+            + gemRow + ", col " + gemCol);
+        console.log("Let's see if there's anything on that square.")
 
-        // is it an empty grid slot? if so, claim it and stop looking
-        if (!this.checkCollision(gemRow, gemCol)) {
-            this.row = gemRow;
-            this.col = gemCol;
-            allGems.push(this);
-            gemPlaced = true;
-            break;
+        // is it an empty grid square? if so, claim it and stop looking.
+        // make sure the player is not on that square, nor any gems
+        if (player.row == gemRow && player.col == gemCol) {
+            console.log('Whoops, the player is already at row ' + player.row
+                + ', col ' + player.col);
+        } else {
+            console.log("Cool, the player isn't there. Player is at row " +
+                player.row + ', col ' + player.col);
+            logGemArray(allGems);
+
+            // make sure there are no gems there, either
+            var index = getIndexOfMatchingGem(gemRow,gemCol);
+            if (index >= 0) {
+                console.log("Bummer, there's already a gem there. Here's the gem array:");
+                logGemArray(allGems);
+                continue;
+            } else {
+                console.log("Awesome, no other gem is there, either.");
+                gemPlaced = true;
+                break;
+            }
         }
     }
 
+    // if we placed the gem, do some housekeeping
+    if (gemPlaced) {
+        // set gem to live for the next 10 - 20 seconds
+        this.lifeTimer = Math.random() *
+            (gemLifetimeMax - gemLifetimeMin) + gemLifetimeMin;
+
+        // remember its position in the grid
+        this.row = gemRow;
+        this.col = gemCol;
+
+        // push it onto gems array
+        allGems.push(this);
+        console.log('We just created this gem: ');
+        this.log();
+        logGemArray(allGems);
+    }
     // if we didn't place the gem after 10 tries, return null
-    if (!gemPlaced) {
+    else {
         return null;
     }
 };
 
+// update a single gem
+Gem.prototype.update = function(dt) {
+
+    // if player has landed on a gem square, collect the gem
+    if (this.checkCollision(player.row, player.col)) {
+        player.collectGem();
+    }
+    // decrement gem's lifetime counter
+    // if time has elapsed, mark the gem for deletion
+    this.deathPanel(dt);
+};
+
+// log this gem
+Gem.prototype.log = function(index) {
+    console.log('gem index=' + index +
+            ' row=' + this.row +
+            ' col=' + this.col +
+            ' markedForDeletion=' + this.markedForDeletion
+    );
+};
+
 // draw the gem on the screen
-// note that we use a fudge factor to center the player vertically
 Gem.prototype.render = function() {
     this.x = this.col * colWidth;
     this.y = this.row * rowHeight - 12;
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// return true if there's a gem at this row and column
-Gem.prototype.checkCollision = function(row,col) {
+// return true if there's a gem at this grid position
+Gem.prototype.checkCollision = function(row, col) {
 
     // iterate through array of gems looking for a match
-    allGems.forEach(function(gem) {
-        if (gem.row == row && gem.col == col) {
-            return true;
-        }
-    });
+    console.log('COMPARING gem at (' + this.row + ',' + this.col +
+        ') with input square (' + row + ',' + col + ')');
+    if (row == this.row && col == this.col) {
+        return true;
+    }
     return false;
 };
 
-////////////////////////////////////////////////////////////////////
+// gem "death panel" decrements each gem's life timeout;
+// if time has elapseed, the gem is removed
+Gem.prototype.deathPanel = function(dt) {
+    // decrement this gem's personal clock
+    this.lifeTimer -= dt;
+
+    // if gem has timed out...
+    if (this.lifeTimer < 0) {
+
+        // mark it for removal from allGems array
+        console.log('We are about to mark this gem for removal:')
+        this.log();
+        console.log('from this array');
+        logGemArray(allGems);
+        for (var i=0; i < allGems.length; i++) {
+            if (this === allGems[i]) {
+                this.markedForDeletion = true;
+                break;
+            }
+        }
+    }
+};
+
+////////////////////////////////////////////////////////////////////ß
 // Initialization
 //
 // Now instantiate your objects.
@@ -270,13 +426,8 @@ allEnemies[2] = new Enemy();    // video shows a max of three enemies
 // Place the player object in a variable called player
 var player = new Player();
 
-// add a couple of gems for the hell of it
+// Here's an array where we store the active gems
 var allGems = [];
-var foo = new Gem();
-foo = new Gem();
-foo = new Gem();
-foo = new Gem();
-
 
 ////////////////////////////////////////////////////////////////////
 // Utilities
@@ -285,6 +436,7 @@ foo = new Gem();
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
+        27: 'escape',
         36: 'home',
         37: 'left',
         38: 'up',
@@ -294,3 +446,26 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+// get the index in the gem array of the gem that matches (row,col);
+// if no match, return -1
+getIndexOfMatchingGem = function(row,col) {
+    for (var i=0; i < allGems.length; i++) {
+        var gem = allGems[i];
+        if (gem.checkCollision(row,col)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// log the contents of the gem array
+logGemArray = function(arr) {
+    console.log('=============================================================');
+    console.log('GEM ARRAY: ' + arr.length + ' elements');
+    for (var i=0; i < arr.length; i++) {
+           var gem = arr[i];
+           gem.log(i);
+    }
+    console.log('=============================================================');
+}

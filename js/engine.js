@@ -91,10 +91,24 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
+        // update the enemies (animtes them moving across the screen)
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+
+        // update the player (checks for collision with an enemy)
+        player.update(dt);
+
+        // update the existing gems (player may collect some)
+        allGems.forEach(function(gem) {
+            gem.update(dt);
+        });
+
+        // add a new gem to the playing field, if it's time to
+        player.addNewGem(dt);
+
+        // reove any gems that have exoired
+        player.removeOldGems();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -169,6 +183,9 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.reset();
         });
+
+        // reset gems -- simply clear the array
+        allGems = [];
     }
 
     /* Go ahead and load all of the images we know we're going to need to
