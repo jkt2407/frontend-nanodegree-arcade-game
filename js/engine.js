@@ -107,7 +107,7 @@ var Engine = (function(global) {
         // add a new gem to the playing field, if it's time to
         player.addNewGem(dt);
 
-        // reove any gems that have exoired
+        // remove any gems that have exoired
         player.removeOldGems();
     }
 
@@ -158,18 +158,18 @@ var Engine = (function(global) {
      * on your enemy and player entities within app.js
      */
     function renderEntities() {
-        /* Loop through all of the objects within the allEnemies array and call
-         * the render function you have defined.
-         */
+        // draw gems first
+        allGems.forEach(function(gem) {
+            gem.render();
+        });
+
+        // next draw the enemies
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
+        // finally, draw the player
         player.render();
-
-        allGems.forEach(function(gem) {
-            gem.render();
-        });
     }
 
     /* This function resets the player to its default position, and also

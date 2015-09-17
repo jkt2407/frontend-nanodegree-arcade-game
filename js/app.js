@@ -373,17 +373,16 @@ Gem.prototype.log = function(index) {
 
 // draw the gem on the screen
 Gem.prototype.render = function() {
-    this.x = this.col * colWidth;
-    this.y = this.row * rowHeight - 12;
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    this.x = this.col * colWidth + colWidth/4;
+    this.y = this.row * rowHeight + rowHeight/4 + 12;
+    var img = Resources.get(this.sprite);
+    ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
 };
 
 // return true if there's a gem at this grid position
 Gem.prototype.checkCollision = function(row, col) {
 
     // iterate through array of gems looking for a match
-    console.log('COMPARING gem at (' + this.row + ',' + this.col +
-        ') with input square (' + row + ',' + col + ')');
     if (row == this.row && col == this.col) {
         return true;
     }
