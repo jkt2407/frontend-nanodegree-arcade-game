@@ -48,7 +48,7 @@ Enemy.prototype.reset = function () {
     this.x = -200;
 
     // enemy speed is determined randomly
-    this.increment = 25; //150 + (Math.random() * 400);
+    this.increment = 150 + (Math.random() * 400);
 }
 
 ///////////////////////////////////////////////////////////
@@ -260,10 +260,20 @@ Gem.prototype.render = function() {
         return;
     }
     // draw the gem (scale it down by half so it looks better)
+    //debugger;
     this.x = this.col * colWidth + colWidth/4;
     this.y = this.row * rowHeight + rowHeight/4 + 12 + scoreboardHeight;
     var img = Resources.get(this.sprite);
     ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
+
+    // draw its point value on top
+    var gemTextX = this.col * colWidth + colWidth/2;
+    var gemTextY = this.row * rowHeight + rowHeight/2
+        + spriteTopMargin + 12 + scoreboardHeight;
+    ctx.fillStyle = "rgb(255,255,255)";
+    ctx.font = "700 16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(gemPoints[this.gemType], gemTextX, gemTextY);
 };
 
 // reset gem and put it to sleep
@@ -446,14 +456,6 @@ Scoreboard.prototype.render = function() {
         }
         lifeX += lifeWidth - 10;
     }
-
-    // draw point total background
-    pointsRectHeight = this.height - 2 * scoreboardMargin;
-    pointsRectWidth = 220;
-    pointsRectX = this.x + this.width - scoreboardMargin - pointsRectWidth;
-    pointsRectY = this.y + scoreboardMargin;
-    ctx.fillStyle = "rgb(255,255,255)";
-//    ctx.fillRect(pointsRectX, pointsRectY, pointsRectWidth, pointsRectHeight);
 
     // draw point total
     ctx.font = "40pt Courier";

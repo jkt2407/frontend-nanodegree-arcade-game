@@ -28,8 +28,8 @@ var gemState = {				// enum of gem states
   ASLEEP: 1,					// hidden, waiting to time out and wake up
   AWAKE: 2						// visible, waiting to be gathered
 };
-var gemSleepTimeMin = 2;		// min numer of seconds before a gem appears
-var gemSleepTimeMax = 5;		// max numer of seconds before a gem appears
+var gemSleepTimeMin = 2;		// min number of seconds before a gem appears
+var gemSleepTimeMax = 5;		// max number of seconds before a gem appears
 var gemAwakeTimeMin = 10;		// min number of seconds a gem stays onscreen
 var gemAwakeTimeMax = 20;		// max number of seconds a gem stays onscreen
 
