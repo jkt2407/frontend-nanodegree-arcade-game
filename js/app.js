@@ -98,7 +98,7 @@ var Player = function() {
     this.col = 0;
 
     // reset life counter
-    this.livesLeft = numPlayerLives;
+    this.livesLeft = 2;
 };
 
 // log this player
@@ -188,7 +188,7 @@ Player.prototype.handleInput = function(keyCode) {
 Player.prototype.reset = function() {
     player.row = playerHomeRow;
     player.col = playerHomeCol;
-    player.livesLeft = numPlayerLives;
+    player.livesLeft = 2;
     player.points = 123456;
 }
 
@@ -400,17 +400,24 @@ Scoreboard.prototype.render = function() {
 
     // draw "HOME" help text
     ctx.fillStyle = "rgb(145,145,145)";
-    ctx.font = "14px Arial";
+    ctx.font = "10px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("HOME", rectX + rectWidth / 2, rectY + rectHeight - 3);
+    ctx.fillText("PRESS HOME", rectX + rectWidth / 2, rectY + rectHeight - 3);
 
     // draw number of lives left
     var lifeWidth = img.naturalWidth * .5;
     var lifeHeight = img.naturalHeight * .5;
     var lifeX = this.x + rectWidth + 2 * scoreboardMargin;
     var lifeY = this.y + (this.height - lifeHeight - spriteTopMargin * .5) / 2 + 6;
-    for (var i=0; i < player.livesLeft; i++) {
+    for (var i=0; i < numPlayerLives; i++) {
+        if (i >= player.livesLeft) {  // draw lives that are gone as ghosts
+            ctx.save();
+            ctx.globalAlpha = 0.2;
+        }
         ctx.drawImage(img, lifeX, lifeY, lifeWidth, lifeHeight);
+        if (i >= player.livesLeft) {
+            ctx.restore();
+        }
         lifeX += lifeWidth - 10;
     }
 
