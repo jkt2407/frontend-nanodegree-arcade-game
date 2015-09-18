@@ -25,9 +25,13 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
+    // compute size of canvas (Note that for the height of a row we are
+    // using colWidth and not rowHeight. This has the effect of overlapping
+    // the rows vertically and having the bottom row be somewhat taller than
+    // the other rows.)
     canvas.width = numCols * colWidth;
-    canvas.height = numRows * colWidth; // we use colWidth not rowHeight
-    doc.body.appendChild(canvas);       // to add some margin at the bottom
+    canvas.height = numRows * colWidth + scoreboardHeight;
+    doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -64,6 +68,7 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
+        instantiateObjects();   // create enemies, player, gems
         reset();
         lastTime = Date.now();
         main();
@@ -91,7 +96,7 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        // update the enemies (animtes them moving across the screen)
+        // update the enemies (animates them moving across the screen)
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
@@ -99,16 +104,10 @@ var Engine = (function(global) {
         // update the player (checks for collision with an enemy)
         player.update(dt);
 
-        // update the existing gems (player may collect some)
+        // update the existing gems (player may collect one)
         allGems.forEach(function(gem) {
             gem.update(dt);
         });
-
-        // add a new gem to the playing field, if it's time to
-        player.addNewGem(dt);
-
-        // remove any gems that have exoired
-        player.removeOldGems();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -145,7 +144,7 @@ var Engine = (function(global) {
                  * we're using them over and over.
                  */
                 ctx.drawImage(Resources.get(rowImages[row]),
-                    col * colWidth, row * rowHeight);
+                    col * colWidth, row * rowHeight + scoreboardHeight);
             }
         }
 
@@ -184,8 +183,10 @@ var Engine = (function(global) {
             enemy.reset();
         });
 
-        // reset gems -- simply clear the array
-        allGems = [];
+        // reset gems
+        allGems.forEach(function(gem) {
+            gem.reset();
+        });
     }
 
     /* Go ahead and load all of the images we know we're going to need to
