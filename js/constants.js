@@ -28,9 +28,12 @@ var gemState = {				// enum of gem states
   ASLEEP: 1,					// hidden, waiting to time out and wake up
   AWAKE: 2						// visible, waiting to be gathered
 };
-var gemPoints =
-    	[200, 500, 1000];		// point value of each gem type
 var gemSleepTimeMin = 2;		// min numer of seconds before a gem appears
 var gemSleepTimeMax = 5;		// max numer of seconds before a gem appears
 var gemAwakeTimeMin = 10;		// min number of seconds a gem stays onscreen
 var gemAwakeTimeMax = 20;		// max number of seconds a gem stays onscreen
+
+// points
+var waterPoints = 100;			// points for reaching the water
+var gemPoints =					// points for collecting a gem
+    	[100, 250, 500];		// point value of each gem type

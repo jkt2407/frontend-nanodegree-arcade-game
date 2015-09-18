@@ -48,30 +48,39 @@ Enemy.prototype.reset = function () {
     this.x = -200;
 
     // enemy speed is determined randomly
-    this.increment = 150 + (Math.random() * 400);
+    this.increment = 25; //150 + (Math.random() * 400);
 }
 
-// return true if input row and col contain an Enemy
-Enemy.prototype.enemyFoundIn = function(row,col) {
+///////////////////////////////////////////////////////////
+//
+// Enemy helper functions
+//
+// if input row and col contain an Enemy, return that enemy
+// otherwise, return null
+var findEnemy = function(row,col) {
 
-    // compute row and column of this enemy's head and tail
-    // make them be 1/3 of the way into a column before
-    // a collision is detected
-    var enemyRow = this.row;
-    var enemyTailCol = Math.floor( (this.x - colWidth/3) / colWidth );
-    var enemyHeadCol = enemyTailCol + 1;
+    // iterate through all enemies on our enemies list
+    for (var i=0; i < allEnemies.length; i++) {
+        var enemy = allEnemies[i];
 
-    // see if input row and column are the same as this enemy's
-    if (row == enemyRow && (col == enemyHeadCol || col == enemyTailCol + 1)) {
-        //console.log("COLLISION!");
-        //console.log('enemy paint position is x=' + this.x);
-        //console.log('enemy head is in [' + enemyRow + ',' + enemyHeadCol + ']');
-        //console.log('enemy tail is in [' + enemyRow + ',' + enemyTailCol + ']');
-        //console.log('player is in cell [' + row + ',' + col + ']');
-        return true;
+        // compute row and column of this enemy's head and tail
+        // make them be 1/3 of the way into a column before
+        // a collision is detected
+        var enemyRow = enemy.row;
+        var enemyTailCol = Math.floor( (enemy.x + colWidth/3) / colWidth );
+        var enemyHeadCol = Math.floor( (enemy.x + colWidth - colWidth/3) / colWidth );
+
+        // see if input row and column are the same as this enemy's
+        if (row == enemyRow && (col == enemyHeadCol || col == enemyTailCol)) {
+            //console.log("COLLISION!");
+            //console.log('enemy paint position is x=' + this.x);
+            //console.log('enemy tail is in [' + enemyRow + ',' + enemyTailCol + ']');
+            //console.log('enemy head is in [' + enemyRow + ',' + enemyHeadCol + ']');
+            //console.log('player is in cell [' + row + ',' + col + ']');
+            return enemy;
+        }
     }
-
-    return false;
+    return null;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -93,12 +102,8 @@ var Player = function() {
     // we are currently using
     this.spriteIndex = 0;
 
-    // the player's grid coordinates
-    this.row = 0;
-    this.col = 0;
-
-    // reset life counter
-    this.livesLeft = 2;
+    // set the player's grid coordinates and life count
+    this.reset();
 };
 
 // log this player
@@ -113,12 +118,10 @@ Player.prototype.log = function() {
 Player.prototype.update = function(dt) {
 
     // see if any enemies are in the same grid square
-    // as the player; if so, player is dead (reset him)
-    for (var i=0; i < allEnemies.length; i++) {
-        var enemy = allEnemies[i];
-        if (enemy.enemyFoundIn(this.row, this.col)) {
-            this.reset();
-        }
+    // as the player; if so, player is dead, count one
+    // life lost
+    if (findEnemy(this.row, this.col) != null) {
+        this.loseOneLife();
     }
 };
 
@@ -132,7 +135,7 @@ Player.prototype.render = function() {
 
 // handle keyboard input
 Player.prototype.handleInput = function(keyCode) {
-    //console.log(keyCode);
+
     switch(keyCode) {
         // pause and invoke the JS debugger
         case 'escape': {
@@ -168,8 +171,11 @@ Player.prototype.handleInput = function(keyCode) {
         // move player one square up
         case 'up': {
             this.row--;
-            if (this.row < 0) {
-                this.row = 0;
+            if (this.row <= 0) {
+                // player reached the water,
+                // give him points and send him home
+                this.points += waterPoints;
+                this.sendHome();
             }
             break;
         }
@@ -186,10 +192,24 @@ Player.prototype.handleInput = function(keyCode) {
 
 // reset the player
 Player.prototype.reset = function() {
-    player.row = playerHomeRow;
-    player.col = playerHomeCol;
-    player.livesLeft = 2;
-    player.points = 123456;
+    this.livesLeft = numPlayerLives;
+    this.points = 0;
+    this.sendHome();
+}
+
+// send the player back to his home position
+Player.prototype.sendHome = function() {
+    this.row = playerHomeRow;
+    this.col = playerHomeCol;
+}
+
+// the player lost a life, send him home and decrement lives left
+Player.prototype.loseOneLife = function() {
+    this.sendHome();
+    this.livesLeft--;
+    if (this.livesLeft <= 0) {
+        // game over
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -246,20 +266,6 @@ Gem.prototype.render = function() {
     ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
 };
 
-// return true if there's a gem at this grid position
-Gem.prototype.gemFoundIn = function(row, col) {
-
-    // iterate through array of gems looking for a match
-    for (var i=0; i < numGems; i++) {
-        var gem = allGems[i];
-        if (gem.gemStatus == gemState.ASLEEP) continue;
-        if (row == gem.row && col == gem.col) {
-            return true;
-        }
-    }
-    return false;
-};
-
 // reset gem and put it to sleep
 Gem.prototype.reset = function() {
 
@@ -309,28 +315,28 @@ Gem.prototype.awaken = function() {
 
         // pick a random col from 0 to numCols - 1
         var gemCol = Math.floor( Math.random() * numCols );
-        console.log("We will place the new gem at row "
-            + gemRow + ", col " + gemCol);
-        console.log("Let's see if there's anything on that square.")
+        //console.log("We will place the new gem at row "
+        //    + gemRow + ", col " + gemCol);
+        //console.log("Let's see if there's anything on that square.")
 
         // is it an empty grid square? if so, claim it and stop looking.
         // make sure the player is not on that square, nor any gems
         if (player.row == gemRow && player.col == gemCol) {
-            console.log('Whoops, the player is already at row ' + player.row
-                + ', col ' + player.col);
+        //    console.log('Whoops, the player is already at row ' + player.row
+        //        + ', col ' + player.col);
         } else {
-            console.log("Cool, the player isn't there. Player is at row " +
-                player.row + ', col ' + player.col);
+        //    console.log("Cool, the player isn't there. Player is at row " +
+        //        player.row + ', col ' + player.col);
 
             // make sure there are no gems there, either
             // if we find one, continue to iterate
-            if (this.gemFoundIn(gemRow, gemCol) ) {
-                console.log("Bummer, there's already a gem there.");
-                continue;
-            } else {
-                console.log("Awesome, no other gem is there, either.");
+            if (findGem(gemRow, gemCol) == null) {
+                //console.log("Awesome, no other gem is there, either.");
                 gemPlaced = true;
                 break;
+            } else {
+                //console.log("Bummer, there's already a gem there.");
+                continue;
             }
         }
     }
@@ -351,6 +357,26 @@ Gem.prototype.awaken = function() {
         this.reset();
     }
 };
+
+//////////////////////////////////////////////////////////////////
+//
+// Gem helper classes
+//
+// if there's a gem at this grid position, return it
+// if not, return null
+var findGem = function(row, col) {
+
+    // iterate through array of gems looking for a match
+    for (var i=0; i < numGems; i++) {
+        var gem = allGems[i];
+        if (gem.gemStatus == gemState.ASLEEP) continue;
+        if (row == gem.row && col == gem.col) {
+            return gem;
+        }
+    }
+    return null;
+};
+
 
 ////////////////////////////////////////////////////////////////////
 // Scoreboard class
