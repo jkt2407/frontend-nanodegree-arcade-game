@@ -157,7 +157,8 @@ var Engine = (function(global) {
      * on your enemy and player entities within app.js
      */
     function renderEntities() {
-        // draw gems first
+
+        // draw gems
         allGems.forEach(function(gem) {
             gem.render();
         });
@@ -167,8 +168,11 @@ var Engine = (function(global) {
             enemy.render();
         });
 
-        // finally, draw the player
+        // draw the player
         player.render();
+
+        // draw the scoreboard
+        scoreboard.render();
     }
 
     /* This function resets the player to its default position, and also

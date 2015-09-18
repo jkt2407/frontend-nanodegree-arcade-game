@@ -96,6 +96,9 @@ var Player = function() {
     // the player's grid coordinates
     this.row = 0;
     this.col = 0;
+
+    // reset life counter
+    this.livesLeft = numPlayerLives;
 };
 
 // log this player
@@ -143,6 +146,7 @@ Player.prototype.handleInput = function(keyCode) {
                 this.spriteIndex = 0;
             }
             player.render();
+            scoreboard.render();
             break;
         }
         // move player one square left
@@ -184,7 +188,9 @@ Player.prototype.handleInput = function(keyCode) {
 Player.prototype.reset = function() {
     player.row = playerHomeRow;
     player.col = playerHomeCol;
-};
+    player.livesLeft = numPlayerLives;
+    player.points = 123456;
+}
 
 ////////////////////////////////////////////////////////////////////
 // Gem class
@@ -320,7 +326,6 @@ Gem.prototype.awaken = function() {
             // if we find one, continue to iterate
             if (this.gemFoundIn(gemRow, gemCol) ) {
                 console.log("Bummer, there's already a gem there.");
-                debugger;
                 continue;
             } else {
                 console.log("Awesome, no other gem is there, either.");
@@ -343,9 +348,87 @@ Gem.prototype.awaken = function() {
     }
     // if we didn't place the gem after 10 tries, go back to sleep
     else {
-        debugger;
         this.reset();
     }
+};
+
+////////////////////////////////////////////////////////////////////
+// Scoreboard class
+//
+// Scoreboard constructor
+var Scoreboard = function() {
+    // initialize scorebord location
+    this.x = 0;
+    this.y = spriteTopMargin;
+    this.width = numCols * colWidth;
+    this.height = scoreboardHeight;
+};
+
+// draw the scoreboardupdate a single gem
+Scoreboard.prototype.render = function() {
+
+    // draw background
+    ctx.beginPath();
+    ctx.rect(this.x, this.y, this.width, this.height)
+    ctx.fillStyle = "rgb(206,218,255)";
+    ctx.fill();
+    ctx.strokeStyle = "rgb(80,80,80)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // draw background rect for player icon
+    var scoreboardMargin = 10;
+    var rectX = this.x + scoreboardMargin;
+    var rectY = this.y + scoreboardMargin;
+    var rectHeight = this.height - 2 * scoreboardMargin;
+    var rectWidth = rectHeight;
+    ctx.beginPath();
+    ctx.rect(rectX, rectY, rectWidth, rectHeight);
+    ctx.fillStyle = "rgb(255,255,255)";
+    ctx.fill();
+    ctx.strokeStyle = "rgb(80,80,80)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // draw player icon (75% size)
+    var img = Resources.get(player.sprite[player.spriteIndex]);
+    var iconWidth = img.naturalWidth * .75;
+    var iconHeight = img.naturalHeight * .75;
+    var iconX = rectX + (rectWidth - iconWidth) / 2;
+    var iconY = rectY + (rectHeight - iconHeight - spriteTopMargin * .75) / 2;
+    ctx.drawImage(img, iconX, iconY, iconWidth, iconHeight);
+
+    // draw "HOME" help text
+    ctx.fillStyle = "rgb(145,145,145)";
+    ctx.font = "14px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("HOME", rectX + rectWidth / 2, rectY + rectHeight - 3);
+
+    // draw number of lives left
+    var lifeWidth = img.naturalWidth * .5;
+    var lifeHeight = img.naturalHeight * .5;
+    var lifeX = this.x + rectWidth + 2 * scoreboardMargin;
+    var lifeY = this.y + (this.height - lifeHeight - spriteTopMargin * .5) / 2 + 6;
+    for (var i=0; i < player.livesLeft; i++) {
+        ctx.drawImage(img, lifeX, lifeY, lifeWidth, lifeHeight);
+        lifeX += lifeWidth - 10;
+    }
+
+    // draw point total background
+    pointsRectHeight = this.height - 2 * scoreboardMargin;
+    pointsRectWidth = 220;
+    pointsRectX = this.x + this.width - scoreboardMargin - pointsRectWidth;
+    pointsRectY = this.y + scoreboardMargin;
+    ctx.fillStyle = "rgb(255,255,255)";
+//    ctx.fillRect(pointsRectX, pointsRectY, pointsRectWidth, pointsRectHeight);
+
+    // draw point total
+    ctx.font = "40pt Courier";
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgb(145,145,145)";
+    ctx.fillText(player.points, this.x + this.width - scoreboardMargin,
+                    this.y + this.height *.7);
+
 };
 
 ////////////////////////////////////////////////////////////////////ß
@@ -361,6 +444,9 @@ var player;
 // Gems get an array of their own
 var allGems = [];
 
+// Scoreboard is an object, too
+var scoreboard;
+
 var instantiateObjects = function() {
 
     // create enemies
@@ -375,6 +461,9 @@ var instantiateObjects = function() {
     for (var i=0; i < numGems; i++) {
         allGems[i] = new Gem();
     }
+
+    // create scoreboard
+    scoreboard = new Scoreboard();
 }
 
 ////////////////////////////////////////////////////////////////////
