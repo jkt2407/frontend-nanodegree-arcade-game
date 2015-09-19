@@ -26,11 +26,11 @@ var Engine = (function(global) {
         lastTime;
 
     // compute size of canvas (Note that for the height of a row we are
-    // using colWidth and not rowHeight. This has the effect of overlapping
+    // using colWidth and not ROW_HEIGHT. This has the effect of overlapping
     // the rows vertically and having the bottom row be somewhat taller than
     // the other rows.)
-    canvas.width = numCols * colWidth;
-    canvas.height = numRows * colWidth + scoreboardHeight;
+    canvas.width = NUM_COLS * colWidth;
+    canvas.height = NUM_ROWS * colWidth + SCOREBOARD_HEIGHT;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -134,8 +134,8 @@ var Engine = (function(global) {
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
          */
-        for (row = 0; row < numRows; row++) {
-            for (col = 0; col < numCols; col++) {
+        for (row = 0; row < NUM_ROWS; row++) {
+            for (col = 0; col < NUM_COLS; col++) {
                 /* The drawImage function of the canvas' context element
                  * requires 3 parameters: the image to draw, the x coordinate
                  * to start drawing and the y coordinate to start drawing.
@@ -144,7 +144,7 @@ var Engine = (function(global) {
                  * we're using them over and over.
                  */
                 ctx.drawImage(Resources.get(rowImages[row]),
-                    col * colWidth, row * rowHeight + scoreboardHeight);
+                    col * colWidth, row * ROW_HEIGHT + SCOREBOARD_HEIGHT);
             }
         }
 

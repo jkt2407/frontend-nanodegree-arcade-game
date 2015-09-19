@@ -5,10 +5,10 @@
 // global constants
 
 // canvas
-var scoreboardHeight = 100;		// height of scoreboard at top of screen
-var numRows = 6;				// number of rows in game
-var numCols = 5;				// number of cols in game
-var rowHeight = 83;				// height of a single row (doesn't include margin)
+var SCOREBOARD_HEIGHT = 100;	// height of scoreboard at top of screen
+var NUM_ROWS = 6;				// number of rows in game
+var NUM_COLS = 5;				// number of cols in game
+var ROW_HEIGHT = 83;			// height of a single row (doesn't include margin)
 var colWidth = 101;				// width of a single column
 var playerHomeRow = 5;			// where player starts out
 var playerHomeCol = 2;			// where player starts out

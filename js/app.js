@@ -23,7 +23,7 @@ Enemy.prototype.update = function(dt) {
     this.x += this.increment * dt;
 
     // if enemy went offscreen right, reset it to offscreen left
-    if (this.x > numCols * colWidth) {
+    if (this.x > NUM_COLS * colWidth) {
         this.reset();
     }
 };
@@ -33,7 +33,7 @@ Enemy.prototype.render = function() {
 
     // compute enemy's y coordinate based on its row,
     // subtracting a little fudge factor to center it vertically
-    this.y = this.row * rowHeight - rowHeight/4 + scoreboardHeight;
+    this.y = this.row * ROW_HEIGHT - ROW_HEIGHT/4 + SCOREBOARD_HEIGHT;
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
@@ -134,7 +134,7 @@ Player.prototype.update = function(dt) {
 // note that we use a fudge factor to center the player vertically
 Player.prototype.render = function() {
     this.x = this.col * colWidth;
-    this.y = this.row * rowHeight - 12 + scoreboardHeight;
+    this.y = this.row * ROW_HEIGHT - 12 + SCOREBOARD_HEIGHT;
     ctx.drawImage(Resources.get(this.sprite[this.spriteIndex]), this.x, this.y);
 };
 
@@ -168,8 +168,8 @@ Player.prototype.handleInput = function(keyCode) {
         // move player one square right
         case 'right': {
             this.col++;
-            if (this.col > numCols - 1) {
-                this.col = numCols - 1;
+            if (this.col > NUM_COLS - 1) {
+                this.col = NUM_COLS - 1;
             }
             break;
         }
@@ -187,8 +187,8 @@ Player.prototype.handleInput = function(keyCode) {
         // move player one square down
         case 'down': {
             this.row++;
-            if (this.row > numRows - 1) {
-                this.row = numRows - 1;
+            if (this.row > NUM_ROWS - 1) {
+                this.row = NUM_ROWS - 1;
             }
             break;
         }
@@ -273,14 +273,14 @@ Gem.prototype.render = function() {
     }
     // draw the gem (scale it down by half so it looks better)
         this.x = this.col * colWidth + colWidth/4;
-    this.y = this.row * rowHeight + rowHeight/4 + 12 + scoreboardHeight;
+    this.y = this.row * ROW_HEIGHT + ROW_HEIGHT/4 + 12 + SCOREBOARD_HEIGHT;
     var img = Resources.get(this.sprite);
     ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
 
     // draw its point value on top
     var gemTextX = this.col * colWidth + colWidth/2;
-    var gemTextY = this.row * rowHeight + rowHeight/2
-        + spriteTopMargin + 12 + scoreboardHeight;
+    var gemTextY = this.row * ROW_HEIGHT + ROW_HEIGHT/2
+        + spriteTopMargin + 12 + SCOREBOARD_HEIGHT;
     ctx.fillStyle = "rgb(255,255,255)";
     ctx.strokeStyle = "rgb(0,0,0)";
     ctx.font = "700 20px Arial";
@@ -347,8 +347,8 @@ Gem.prototype.awaken = function() {
         // pick a random row from 1 to 3
         var gemRow = Math.floor( Math.random() * 3 + 1 );
 
-        // pick a random col from 0 to numCols - 1
-        var gemCol = Math.floor( Math.random() * numCols );
+        // pick a random col from 0 to NUM_COLS - 1
+        var gemCol = Math.floor( Math.random() * NUM_COLS );
 
         // is it an empty grid square? if so, claim it and stop looking.
         // make sure the player is not on that square, nor any gems
@@ -417,8 +417,8 @@ var Scoreboard = function() {
     // initialize scorebord location
     this.x = 0;
     this.y = spriteTopMargin;
-    this.width = numCols * colWidth;
-    this.height = scoreboardHeight;
+    this.width = NUM_COLS * colWidth;
+    this.height = SCOREBOARD_HEIGHT;
 };
 
 // draw the scoreboardupdate a single gem
