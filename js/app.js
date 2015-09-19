@@ -123,7 +123,7 @@ Player.prototype.update = function(dt) {
     if (gem != null)
     {
         // collect the appropriate points award
-        this.points += gemPoints[ gem.gemType ];
+        this.points += GEM_POINTS[ gem.gemType ];
 
         // put gem to sleep
         gem.reset();
@@ -179,7 +179,7 @@ Player.prototype.handleInput = function(keyCode) {
             if (this.row <= 0) {
                 // player reached the water,
                 // give him points and send him home
-                this.points += waterPoints;
+                this.points += WATER_POINTS;
                 this.sendHome();
             }
             break;
@@ -246,13 +246,13 @@ Gem.prototype.update = function(dt) {
 
         // no, go to sleep
         default:
-        case gemState.AWAKE: {
+        case GEM_STATE.AWAKE: {
             this.reset();
             break;
         }
 
         // yes, wake up
-        case gemState.ASLEEP: {
+        case GEM_STATE.ASLEEP: {
             this.awaken();
             break;
         }
@@ -268,7 +268,7 @@ Gem.prototype.log = function() {
 // draw the gem on the screen
 Gem.prototype.render = function() {
     // if it's asleep don't draw it
-    if (this.gemStatus == gemState.ASLEEP) {
+    if (this.gemStatus == GEM_STATE.ASLEEP) {
         return;
     }
     // draw the gem (scale it down by half so it looks better)
@@ -286,16 +286,16 @@ Gem.prototype.render = function() {
     ctx.font = "700 20px Arial";
     ctx.textAlign = "center";
     ctx.lineWidth = 2;
-    ctx.strokeText(gemPoints[this.gemType], gemTextX, gemTextY);
-    ctx.fillText(gemPoints[this.gemType], gemTextX, gemTextY);
+    ctx.strokeText(GEM_POINTS[this.gemType], gemTextX, gemTextY);
+    ctx.fillText(GEM_POINTS[this.gemType], gemTextX, gemTextY);
 };
 
 // reset gem and put it to sleep
 Gem.prototype.reset = function() {
 
     // set timeout for when this gem will wake up
-    this.timer = Math.random() * (gemSleepTimeMax - gemSleepTimeMin)
-                 + gemSleepTimeMin;
+    this.timer = Math.random() * (GEM_SLEEP_TIME_MAX - GEM_SLEEP_TIME_MIN)
+                 + GEM_SLEEP_TIME_MIN;
 
     // set gem type randomly
     var rand = Math.random();
@@ -329,7 +329,7 @@ Gem.prototype.reset = function() {
     }
 
     // go to sleep for a while
-    this.gemStatus = gemState.ASLEEP;
+    this.gemStatus = GEM_STATE.ASLEEP;
 };
 
 // wake a gem up by positioning it and making it visible
@@ -377,8 +377,8 @@ Gem.prototype.awaken = function() {
     if (gemPlaced) {
         // set gem to stay awake for the next 10 - 20 seconds
         this.timer = Math.random() *
-            (gemAwakeTimeMax - gemAwakeTimeMin) + gemAwakeTimeMin;
-        this.gemStatus = gemState.AWAKE;
+            (GEM_AWAKE_TIME_MAX - GEM_AWAKE_TIME_MIN) + GEM_AWAKE_TIME_MIN;
+        this.gemStatus = GEM_STATE.AWAKE;
 
         // remember its position in the grid
         this.row = gemRow;
@@ -399,9 +399,9 @@ Gem.prototype.awaken = function() {
 var findGem = function(row, col) {
 
     // iterate through array of gems looking for a match
-    for (var i=0; i < numGems; i++) {
+    for (var i=0; i < NUM_GEMS; i++) {
         var gem = allGems[i];
-        if (gem.gemStatus == gemState.ASLEEP) continue;
+        if (gem.gemStatus == GEM_STATE.ASLEEP) continue;
         if (row == gem.row && col == gem.col) {
             return gem;
         }
@@ -515,7 +515,7 @@ var instantiateObjects = function() {
     player = new Player();
 
     // create gems
-    for (var i=0; i < numGems; i++) {
+    for (var i=0; i < NUM_GEMS; i++) {
         allGems[i] = new Gem();
     }
 
