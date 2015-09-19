@@ -42,7 +42,6 @@ Enemy.prototype.reset = function () {
 
     // enemy goes on a random row from 1-3
     this.row = Math.floor( Math.random() * 3 + 1 );
-    //console.log("Enemy row = " + this.row);
 
     // enemy starts at 200 pixels offscreen left
     this.x = -200;
@@ -213,8 +212,15 @@ Player.prototype.sendHome = function() {
 Player.prototype.loseOneLife = function() {
     this.sendHome();
     this.livesLeft--;
+
+    // if he lost his last life, game over
     if (this.livesLeft <= 0) {
-        // game over
+
+        if (window.confirm("Game over! Do you want to play again?")) {
+            this.reset();
+        } else {
+            debugger;
+        }
     }
 }
 
@@ -343,9 +349,6 @@ Gem.prototype.awaken = function() {
 
         // pick a random col from 0 to numCols - 1
         var gemCol = Math.floor( Math.random() * numCols );
-        //console.log("We will place the new gem at row "
-        //    + gemRow + ", col " + gemCol);
-        //console.log("Let's see if there's anything on that square.")
 
         // is it an empty grid square? if so, claim it and stop looking.
         // make sure the player is not on that square, nor any gems

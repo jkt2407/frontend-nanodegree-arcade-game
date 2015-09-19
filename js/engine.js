@@ -68,7 +68,7 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        instantiateObjects();   // create enemies, player, gems
+        instantiateObjects();   // create enemies, player, gems, scoreboard
         reset();
         lastTime = Date.now();
         main();
