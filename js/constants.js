@@ -9,17 +9,17 @@ var SCOREBOARD_HEIGHT = 100;	// height of scoreboard at top of screen
 var NUM_ROWS = 6;				// number of rows in game
 var NUM_COLS = 5;				// number of cols in game
 var ROW_HEIGHT = 83;			// height of a single row (doesn't include margin)
-var colWidth = 101;				// width of a single column
-var playerHomeRow = 5;			// where player starts out
-var playerHomeCol = 2;			// where player starts out
+var COL_WIDTH = 101;				// width of a single column
+var PLAYER_HOME_ROW = 5;			// where player starts out
+var PLAYER_HOME_COL = 2;			// where player starts out
 
 // enemies
-var numEnemies = 3;				// number of simultaneous enemies
+var NUM_ENEMIES = 3;				// number of simultaneous enemies
 
 // player
-var numPlayerSprites = 5;		// number of player personas
-var spriteTopMargin = 50;		// height of transparent area at the top of each sprite
-var numPlayerLives = 4;			// how many times you can die until game over
+var NUM_PLAYER_SPRITES = 5;		// number of player personas
+var SPRITE_TOP_MARGIN = 50;		// height of transparent area at the top of each sprite
+var NUM_PLAYER_LIVES = 4;			// how many times you can die until game over
 
 // gems
 var numGems = 4;				// number of simultaneous gems allowed

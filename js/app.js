@@ -23,7 +23,7 @@ Enemy.prototype.update = function(dt) {
     this.x += this.increment * dt;
 
     // if enemy went offscreen right, reset it to offscreen left
-    if (this.x > NUM_COLS * colWidth) {
+    if (this.x > NUM_COLS * COL_WIDTH) {
         this.reset();
     }
 };
@@ -66,8 +66,8 @@ var findEnemy = function(row,col) {
         // make them be 1/3 of the way into a column before
         // a collision is detected
         var enemyRow = enemy.row;
-        var enemyTailCol = Math.floor( (enemy.x + colWidth/3) / colWidth );
-        var enemyHeadCol = Math.floor( (enemy.x + colWidth - colWidth/3) / colWidth );
+        var enemyTailCol = Math.floor( (enemy.x + COL_WIDTH/3) / COL_WIDTH );
+        var enemyHeadCol = Math.floor( (enemy.x + COL_WIDTH - COL_WIDTH/3) / COL_WIDTH );
 
         // see if input row and column are the same as this enemy's
         if (row == enemyRow && (col == enemyHeadCol || col == enemyTailCol)) {
@@ -133,7 +133,7 @@ Player.prototype.update = function(dt) {
 // draw the player on the screen
 // note that we use a fudge factor to center the player vertically
 Player.prototype.render = function() {
-    this.x = this.col * colWidth;
+    this.x = this.col * COL_WIDTH;
     this.y = this.row * ROW_HEIGHT - 12 + SCOREBOARD_HEIGHT;
     ctx.drawImage(Resources.get(this.sprite[this.spriteIndex]), this.x, this.y);
 };
@@ -150,7 +150,7 @@ Player.prototype.handleInput = function(keyCode) {
         // toggle through the various player sprites
         case 'home': {
             this.spriteIndex++;
-            if (this.spriteIndex >= numPlayerSprites) {
+            if (this.spriteIndex >= NUM_PLAYER_SPRITES) {
                 this.spriteIndex = 0;
             }
             player.render();
@@ -197,15 +197,15 @@ Player.prototype.handleInput = function(keyCode) {
 
 // reset the player
 Player.prototype.reset = function() {
-    this.livesLeft = numPlayerLives;
+    this.livesLeft = NUM_PLAYER_LIVES;
     this.points = 0;
     this.sendHome();
 }
 
 // send the player back to his home position
 Player.prototype.sendHome = function() {
-    this.row = playerHomeRow;
-    this.col = playerHomeCol;
+    this.row = PLAYER_HOME_ROW;
+    this.col = PLAYER_HOME_COL;
 }
 
 // the player lost a life, send him home and decrement lives left
@@ -272,15 +272,15 @@ Gem.prototype.render = function() {
         return;
     }
     // draw the gem (scale it down by half so it looks better)
-        this.x = this.col * colWidth + colWidth/4;
+        this.x = this.col * COL_WIDTH + COL_WIDTH/4;
     this.y = this.row * ROW_HEIGHT + ROW_HEIGHT/4 + 12 + SCOREBOARD_HEIGHT;
     var img = Resources.get(this.sprite);
     ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
 
     // draw its point value on top
-    var gemTextX = this.col * colWidth + colWidth/2;
+    var gemTextX = this.col * COL_WIDTH + COL_WIDTH/2;
     var gemTextY = this.row * ROW_HEIGHT + ROW_HEIGHT/2
-        + spriteTopMargin + 12 + SCOREBOARD_HEIGHT;
+        + SPRITE_TOP_MARGIN + 12 + SCOREBOARD_HEIGHT;
     ctx.fillStyle = "rgb(255,255,255)";
     ctx.strokeStyle = "rgb(0,0,0)";
     ctx.font = "700 20px Arial";
@@ -301,12 +301,13 @@ Gem.prototype.reset = function() {
     var rand = Math.random();
 
     // force an unequal ditrubtion: 60% orange, 30% green, 10% blue
+    console.log('rand=', rand);
     if (rand < .5) {
         this.gemType = 0;   // orange
-    } else if (rand < .85) {
+    } else if (rand < .80) {
         this.gemType = 1;   // green
     } else {
-        this.gemtype = 2;   // blue
+        this.gemType = 2;   // blue
     }
 
 
@@ -416,8 +417,8 @@ var findGem = function(row, col) {
 var Scoreboard = function() {
     // initialize scorebord location
     this.x = 0;
-    this.y = spriteTopMargin;
-    this.width = NUM_COLS * colWidth;
+    this.y = SPRITE_TOP_MARGIN;
+    this.width = NUM_COLS * COL_WIDTH;
     this.height = SCOREBOARD_HEIGHT;
 };
 
@@ -452,7 +453,7 @@ Scoreboard.prototype.render = function() {
     var iconWidth = img.naturalWidth * .75;
     var iconHeight = img.naturalHeight * .75;
     var iconX = rectX + (rectWidth - iconWidth) / 2;
-    var iconY = rectY + (rectHeight - iconHeight - spriteTopMargin * .75) / 2;
+    var iconY = rectY + (rectHeight - iconHeight - SPRITE_TOP_MARGIN * .75) / 2;
     ctx.drawImage(img, iconX, iconY, iconWidth, iconHeight);
 
     // draw "HOME" help text
@@ -465,8 +466,8 @@ Scoreboard.prototype.render = function() {
     var lifeWidth = img.naturalWidth * .5;
     var lifeHeight = img.naturalHeight * .5;
     var lifeX = this.x + rectWidth + 2 * scoreboardMargin;
-    var lifeY = this.y + (this.height - lifeHeight - spriteTopMargin * .5) / 2 + 6;
-    for (var i=0; i < numPlayerLives; i++) {
+    var lifeY = this.y + (this.height - lifeHeight - SPRITE_TOP_MARGIN * .5) / 2 + 6;
+    for (var i=0; i < NUM_PLAYER_LIVES; i++) {
         if (i >= player.livesLeft) {  // draw lives that are gone as ghosts
             ctx.save();
             ctx.globalAlpha = 0.2;
@@ -506,7 +507,7 @@ var scoreboard;
 var instantiateObjects = function() {
 
     // create enemies
-    for (var i=0; i < numEnemies; i++) {
+    for (var i=0; i < NUM_ENEMIES; i++) {
         allEnemies[i] = new Enemy();
     }
 

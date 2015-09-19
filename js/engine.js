@@ -26,11 +26,11 @@ var Engine = (function(global) {
         lastTime;
 
     // compute size of canvas (Note that for the height of a row we are
-    // using colWidth and not ROW_HEIGHT. This has the effect of overlapping
+    // using COL_WIDTH and not ROW_HEIGHT. This has the effect of overlapping
     // the rows vertically and having the bottom row be somewhat taller than
     // the other rows.)
-    canvas.width = NUM_COLS * colWidth;
-    canvas.height = NUM_ROWS * colWidth + SCOREBOARD_HEIGHT;
+    canvas.width = NUM_COLS * COL_WIDTH;
+    canvas.height = NUM_ROWS * COL_WIDTH + SCOREBOARD_HEIGHT;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -144,7 +144,7 @@ var Engine = (function(global) {
                  * we're using them over and over.
                  */
                 ctx.drawImage(Resources.get(rowImages[row]),
-                    col * colWidth, row * ROW_HEIGHT + SCOREBOARD_HEIGHT);
+                    col * COL_WIDTH, row * ROW_HEIGHT + SCOREBOARD_HEIGHT);
             }
         }
 
