@@ -72,11 +72,6 @@ var findEnemy = function(row,col) {
 
         // see if input row and column are the same as this enemy's
         if (row == enemyRow && (col == enemyHeadCol || col == enemyTailCol)) {
-            //console.log("COLLISION!");
-            //console.log('enemy paint position is x=' + this.x);
-            //console.log('enemy tail is in [' + enemyRow + ',' + enemyTailCol + ']');
-            //console.log('enemy head is in [' + enemyRow + ',' + enemyHeadCol + ']');
-            //console.log('player is in cell [' + row + ',' + col + ']');
             return enemy;
         }
     }
@@ -122,6 +117,17 @@ Player.prototype.update = function(dt) {
     // life lost
     if (findEnemy(this.row, this.col) != null) {
         this.loseOneLife();
+    }
+
+    // see if there's a gem on this square, an if so, collect it
+    var gem = findGem(this.row, this.col);
+    if (gem != null)
+    {
+        // collect the appropriate points award
+        this.points += gemPoints[ gem.gemType ];
+
+        // put gem to sleep
+        gem.reset();
     }
 };
 
@@ -260,8 +266,7 @@ Gem.prototype.render = function() {
         return;
     }
     // draw the gem (scale it down by half so it looks better)
-    //debugger;
-    this.x = this.col * colWidth + colWidth/4;
+        this.x = this.col * colWidth + colWidth/4;
     this.y = this.row * rowHeight + rowHeight/4 + 12 + scoreboardHeight;
     var img = Resources.get(this.sprite);
     ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
@@ -271,8 +276,11 @@ Gem.prototype.render = function() {
     var gemTextY = this.row * rowHeight + rowHeight/2
         + spriteTopMargin + 12 + scoreboardHeight;
     ctx.fillStyle = "rgb(255,255,255)";
-    ctx.font = "700 16px Arial";
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.font = "700 20px Arial";
     ctx.textAlign = "center";
+    ctx.lineWidth = 2;
+    ctx.strokeText(gemPoints[this.gemType], gemTextX, gemTextY);
     ctx.fillText(gemPoints[this.gemType], gemTextX, gemTextY);
 };
 
@@ -284,7 +292,17 @@ Gem.prototype.reset = function() {
                  + gemSleepTimeMin;
 
     // set gem type randomly
-    this.gemType =  Math.floor( Math.random() * numGemTypes );
+    var rand = Math.random();
+
+    // force an unequal ditrubtion: 60% orange, 30% green, 10% blue
+    if (rand < .5) {
+        this.gemType = 0;   // orange
+    } else if (rand < .85) {
+        this.gemType = 1;   // green
+    } else {
+        this.gemtype = 2;   // blue
+    }
+
 
     // pick an image for this gem type
     switch (this.gemType) {
