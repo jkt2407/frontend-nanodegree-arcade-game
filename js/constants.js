@@ -28,10 +28,10 @@ var GEM_STATE = {				// enum of gem states
   ASLEEP: 1,					// hidden, waiting to time out and wake up
   AWAKE: 2						// visible, waiting to be gathered
 };
-var GEM_SLEEP_TIME_MIN = 2;		// min number of seconds before a gem appears
-var GEM_SLEEP_TIME_MAX = 5;		// max number of seconds before a gem appears
-var GEM_AWAKE_TIME_MIN = 10;	// min number of seconds a gem stays onscreen
-var GEM_AWAKE_TIME_MAX = 20;	// max number of seconds a gem stays onscreen
+var GEM_SLEEP_TIME_MIN =  6;	// min number of seconds before a gem appears
+var GEM_SLEEP_TIME_MAX = 30;	// max number of seconds before a gem appears
+var GEM_AWAKE_TIME_MIN =  4;	// min number of seconds a gem stays onscreen
+var GEM_AWAKE_TIME_MAX = 10;	// max number of seconds a gem stays onscreen
 
 // points
 var WATER_POINTS = 100;			// points for reaching the water

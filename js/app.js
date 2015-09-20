@@ -48,7 +48,7 @@ Enemy.prototype.reset = function () {
 
     // enemy speed is determined randomly
     this.increment = 150 + (Math.random() * 400);
-}
+};
 
 ///////////////////////////////////////////////////////////
 //
@@ -75,7 +75,7 @@ var findEnemy = function(row,col) {
         }
     }
     return null;
-}
+};
 
 ////////////////////////////////////////////////////////////////////
 // Player class
@@ -114,13 +114,16 @@ Player.prototype.update = function(dt) {
     // see if any enemies are in the same grid square
     // as the player; if so, player is dead, count one
     // life lost
-    if (findEnemy(this.row, this.col) != null) {
+    var enemy = findEnemy(this.row, this.col);
+    if (enemy !== null) {
+
+        // decrement life count and check for end of game
         this.loseOneLife();
     }
 
-    // see if there's a gem on this square, an if so, collect it
+    // see if there's a gem on this square, and if so, collect it
     var gem = findGem(this.row, this.col);
-    if (gem != null)
+    if (gem !== null)
     {
         // collect the appropriate points award
         this.points += GEM_POINTS[ gem.gemType ];
@@ -144,7 +147,7 @@ Player.prototype.handleInput = function(keyCode) {
     switch(keyCode) {
         // pause and invoke the JS debugger
         case 'escape': {
-            debugger;
+            //debugger;
             break;
         }
         // toggle through the various player sprites
@@ -200,13 +203,13 @@ Player.prototype.reset = function() {
     this.livesLeft = NUM_PLAYER_LIVES;
     this.points = 0;
     this.sendHome();
-}
+};
 
 // send the player back to his home position
 Player.prototype.sendHome = function() {
     this.row = PLAYER_HOME_ROW;
     this.col = PLAYER_HOME_COL;
-}
+};
 
 // the player lost a life, send him home and decrement lives left
 Player.prototype.loseOneLife = function() {
@@ -217,12 +220,13 @@ Player.prototype.loseOneLife = function() {
     if (this.livesLeft <= 0) {
 
         if (window.confirm("Game over! Do you want to play again?")) {
-            this.reset();
+            reset();
         } else {
-            debugger;
+            // TODO: figure out how to exit gracefully
+            window.open("http://www.udacity.com","uwindow");
         }
     }
-}
+};
 
 ////////////////////////////////////////////////////////////////////
 // Gem class
@@ -279,8 +283,8 @@ Gem.prototype.render = function() {
 
     // draw its point value on top
     var gemTextX = this.col * COL_WIDTH + COL_WIDTH/2;
-    var gemTextY = this.row * ROW_HEIGHT + ROW_HEIGHT/2
-        + SPRITE_TOP_MARGIN + 12 + SCOREBOARD_HEIGHT;
+    var gemTextY = this.row * ROW_HEIGHT + ROW_HEIGHT/2 +
+        SPRITE_TOP_MARGIN + 12 + SCOREBOARD_HEIGHT;
     ctx.fillStyle = "rgb(255,255,255)";
     ctx.strokeStyle = "rgb(0,0,0)";
     ctx.font = "700 20px Arial";
@@ -294,17 +298,17 @@ Gem.prototype.render = function() {
 Gem.prototype.reset = function() {
 
     // set timeout for when this gem will wake up
-    this.timer = Math.random() * (GEM_SLEEP_TIME_MAX - GEM_SLEEP_TIME_MIN)
-                 + GEM_SLEEP_TIME_MIN;
+    this.timer = Math.random() * (GEM_SLEEP_TIME_MAX - GEM_SLEEP_TIME_MIN) +
+        GEM_SLEEP_TIME_MIN;
 
     // set gem type randomly
     var rand = Math.random();
 
     // force an unequal ditrubtion: 60% orange, 30% green, 10% blue
     console.log('rand=', rand);
-    if (rand < .5) {
+    if (rand < 0.5) {
         this.gemType = 0;   // orange
-    } else if (rand < .80) {
+    } else if (rand < 0.80) {
         this.gemType = 1;   // green
     } else {
         this.gemType = 2;   // blue
@@ -341,15 +345,17 @@ Gem.prototype.awaken = function() {
     // is unoccupied - we'll try 10 times to find an empty
     // grid slot.)
     var gemPlaced = false;
+    var gemRow = -1;
+    var gemCol = -1;
     this.row = -1;
     this.col = -1;
     for (var i = 0; i < 10; i++) {
 
         // pick a random row from 1 to 3
-        var gemRow = Math.floor( Math.random() * 3 + 1 );
+        gemRow = Math.floor( Math.random() * 3 + 1 );
 
         // pick a random col from 0 to NUM_COLS - 1
-        var gemCol = Math.floor( Math.random() * NUM_COLS );
+        gemCol = Math.floor( Math.random() * NUM_COLS );
 
         // is it an empty grid square? if so, claim it and stop looking.
         // make sure the player is not on that square, nor any gems
@@ -362,7 +368,7 @@ Gem.prototype.awaken = function() {
 
             // make sure there are no gems there, either
             // if we find one, continue to iterate
-            if (findGem(gemRow, gemCol) == null) {
+            if (findGem(gemRow, gemCol) === null) {
                 //console.log("Awesome, no other gem is there, either.");
                 gemPlaced = true;
                 break;
@@ -401,7 +407,10 @@ var findGem = function(row, col) {
     // iterate through array of gems looking for a match
     for (var i=0; i < NUM_GEMS; i++) {
         var gem = allGems[i];
-        if (gem.gemStatus == GEM_STATE.ASLEEP) continue;
+        if (gem.gemStatus == GEM_STATE.ASLEEP) {
+            // don't count sleeper
+            continue;
+        }
         if (row == gem.row && col == gem.col) {
             return gem;
         }
@@ -427,7 +436,7 @@ Scoreboard.prototype.render = function() {
 
     // draw background
     ctx.beginPath();
-    ctx.rect(this.x, this.y, this.width, this.height)
+    ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fillStyle = "rgb(206,218,255)";
     ctx.fill();
     ctx.strokeStyle = "rgb(80,80,80)";
@@ -450,10 +459,10 @@ Scoreboard.prototype.render = function() {
 
     // draw player icon (75% size)
     var img = Resources.get(player.sprite[player.spriteIndex]);
-    var iconWidth = img.naturalWidth * .75;
-    var iconHeight = img.naturalHeight * .75;
+    var iconWidth = img.naturalWidth * 0.75;
+    var iconHeight = img.naturalHeight * 0.75;
     var iconX = rectX + (rectWidth - iconWidth) / 2;
-    var iconY = rectY + (rectHeight - iconHeight - SPRITE_TOP_MARGIN * .75) / 2;
+    var iconY = rectY + (rectHeight - iconHeight - SPRITE_TOP_MARGIN * 0.75) / 2;
     ctx.drawImage(img, iconX, iconY, iconWidth, iconHeight);
 
     // draw "HOME" help text
@@ -463,10 +472,10 @@ Scoreboard.prototype.render = function() {
     ctx.fillText("PRESS HOME", rectX + rectWidth / 2, rectY + rectHeight - 3);
 
     // draw number of lives left
-    var lifeWidth = img.naturalWidth * .5;
-    var lifeHeight = img.naturalHeight * .5;
+    var lifeWidth = img.naturalWidth * 0.5;
+    var lifeHeight = img.naturalHeight * 0.5;
     var lifeX = this.x + rectWidth + 2 * scoreboardMargin;
-    var lifeY = this.y + (this.height - lifeHeight - SPRITE_TOP_MARGIN * .5) / 2 + 6;
+    var lifeY = this.y + (this.height - lifeHeight - SPRITE_TOP_MARGIN * 0.5) / 2 + 6;
     for (var i=0; i < NUM_PLAYER_LIVES; i++) {
         if (i >= player.livesLeft) {  // draw lives that are gone as ghosts
             ctx.save();
@@ -484,7 +493,7 @@ Scoreboard.prototype.render = function() {
     ctx.textAlign = "right";
     ctx.fillStyle = "rgb(145,145,145)";
     ctx.fillText(player.points, this.x + this.width - scoreboardMargin,
-                    this.y + this.height *.7);
+                    this.y + this.height * 0.7);
 
 };
 
@@ -504,6 +513,7 @@ var allGems = [];
 // Scoreboard is an object, too
 var scoreboard;
 
+// this function is called once at startup to create our obects
 var instantiateObjects = function() {
 
     // create enemies
@@ -515,14 +525,14 @@ var instantiateObjects = function() {
     player = new Player();
 
     // create gems
-    for (var i=0; i < NUM_GEMS; i++) {
+    for (i=0; i < NUM_GEMS; i++) {
         allGems[i] = new Gem();
     }
 
     // create scoreboard
     scoreboard = new Scoreboard();
 }
-
+;
 ////////////////////////////////////////////////////////////////////
 // Utilities
 //

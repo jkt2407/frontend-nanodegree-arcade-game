@@ -176,7 +176,8 @@ var Engine = (function(global) {
     }
 
     /* This function resets the player to its default position, and also
-     * initializes the array of enemies and sets them to their defaults
+     * initializes the arrays of enemies and gems and sets them to their
+     * defaults
      */
     function reset() {
         // reset player
@@ -218,4 +219,11 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+
+    /* Assign the main reset function to the global variable so we can
+     * access it from app.js
+     */
+     global.reset = reset;
+
+
 })(this);
