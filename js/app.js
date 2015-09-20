@@ -220,10 +220,11 @@ Player.prototype.loseOneLife = function() {
     if (this.livesLeft <= 0) {
 
         if (window.confirm("Game over! Do you want to play again?")) {
+            // yes, start a new game
             reset();
         } else {
-            // TODO: figure out how to exit gracefully
-            window.open("http://www.udacity.com","uwindow");
+            // no, go to udacity website
+            window.location.href = "http://www.udacity.com";
         }
     }
 };
@@ -304,8 +305,7 @@ Gem.prototype.reset = function() {
     // set gem type randomly
     var rand = Math.random();
 
-    // force an unequal ditrubtion: 60% orange, 30% green, 10% blue
-    console.log('rand=', rand);
+    // force an unequal distrubtion: 50% orange, 30% green, 20% blue
     if (rand < 0.5) {
         this.gemType = 0;   // orange
     } else if (rand < 0.80) {
@@ -313,7 +313,6 @@ Gem.prototype.reset = function() {
     } else {
         this.gemType = 2;   // blue
     }
-
 
     // pick an image for this gem type
     switch (this.gemType) {
@@ -398,7 +397,7 @@ Gem.prototype.awaken = function() {
 
 //////////////////////////////////////////////////////////////////
 //
-// Gem helper classes
+// Gem helper functions
 //
 // if there's a gem at this grid position, return it
 // if not, return null
