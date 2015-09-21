@@ -16,3 +16,4 @@ playing again.
 
 Extra feature: press the Home key to change the player skin.
 
+Game settings can be changed in js/constants.js.
