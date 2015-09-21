@@ -31,8 +31,9 @@ Enemy.prototype.update = function(dt) {
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
 
-    // compute enemy's y coordinate based on its row,
-    // subtracting a little fudge factor to center it vertically
+    // enemy's x coordinate is computed in update() above.
+    // now compute enemy's y coordinate based on its row,
+    // and draw this enemy.
     this.y = this.row * ROW_HEIGHT - ROW_HEIGHT/4 + SCOREBOARD_HEIGHT;
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -40,13 +41,13 @@ Enemy.prototype.render = function() {
 // reset an enemy's position and speed
 Enemy.prototype.reset = function () {
 
-    // enemy goes on a random row from 1-3
+    // reset enemy goes on a random row from 1-3
     this.row = Math.floor( Math.random() * 3 + 1 );
 
-    // enemy starts at 200 pixels offscreen left
+    // enemy starts offscreen left
     this.x = -200;
 
-    // enemy speed is determined randomly
+    // enemy speed is a constant, determined randomly
     this.increment = 150 + (Math.random() * 400);
 };
 
@@ -63,8 +64,8 @@ var findEnemy = function(row,col) {
         var enemy = allEnemies[i];
 
         // compute row and column of this enemy's head and tail
-        // make them be 1/3 of the way into a column before
-        // a collision is detected
+        // make the enemy be 1/3 of the way into a column before
+        // a collision is detected there
         var enemyRow = enemy.row;
         var enemyTailCol = Math.floor( (enemy.x + COL_WIDTH/3) / COL_WIDTH );
         var enemyHeadCol = Math.floor( (enemy.x + COL_WIDTH - COL_WIDTH/3) / COL_WIDTH );
@@ -74,6 +75,7 @@ var findEnemy = function(row,col) {
             return enemy;
         }
     }
+    // no enemy found in the requested row and column
     return null;
 };
 
@@ -102,6 +104,7 @@ var Player = function() {
 
 // log this player
 Player.prototype.log = function() {
+
     console.log('player ' +
             ' row=' + this.row +
             ' col=' + this.col
@@ -128,8 +131,15 @@ Player.prototype.update = function(dt) {
         // collect the appropriate points award
         this.points += GEM_POINTS[ gem.gemType ];
 
-        // put gem to sleep
+        // put gem to sleep for a bit
         gem.reset();
+    }
+
+    // if player reached the water, give him points
+    // and send him home (back to the grass)
+    if (this.row <= 0) {
+        this.points += WATER_POINTS;
+        this.sendHome();
     }
 };
 
@@ -180,10 +190,7 @@ Player.prototype.handleInput = function(keyCode) {
         case 'up': {
             this.row--;
             if (this.row <= 0) {
-                // player reached the water,
-                // give him points and send him home
-                this.points += WATER_POINTS;
-                this.sendHome();
+                this.row = 0;
             }
             break;
         }
@@ -234,7 +241,7 @@ Player.prototype.loseOneLife = function() {
 //
 // Gem constructor
 var Gem = function() {
-    // reset gem and start it sleeping
+    // reset gem and start it sleeping (i.e. hidden)
     this.reset();
 };
 
@@ -266,18 +273,21 @@ Gem.prototype.update = function(dt) {
 
 // log this gem
 Gem.prototype.log = function() {
+
     console.log('GEM state=' + this.gemStatus + ' type=' + this.gemType +
         ' timer=' + this.timer +' row=' + this.row + ' col=' + this.col);
 };
 
 // draw the gem on the screen
 Gem.prototype.render = function() {
+
     // if it's asleep don't draw it
     if (this.gemStatus == GEM_STATE.ASLEEP) {
         return;
     }
+
     // draw the gem (scale it down by half so it looks better)
-        this.x = this.col * COL_WIDTH + COL_WIDTH/4;
+    this.x = this.col * COL_WIDTH + COL_WIDTH/4;
     this.y = this.row * ROW_HEIGHT + ROW_HEIGHT/4 + 12 + SCOREBOARD_HEIGHT;
     var img = Resources.get(this.sprite);
     ctx.drawImage(img, this.x, this.y, img.naturalWidth/2, img.naturalHeight/2);
@@ -308,27 +318,15 @@ Gem.prototype.reset = function() {
     // force an unequal distrubtion: 50% orange, 30% green, 20% blue
     if (rand < 0.5) {
         this.gemType = 0;   // orange
+        this.sprite = 'images/gem-orange.png';
+
     } else if (rand < 0.80) {
         this.gemType = 1;   // green
+        this.sprite = 'images/gem-green.png';
+
     } else {
         this.gemType = 2;   // blue
-    }
-
-    // pick an image for this gem type
-    switch (this.gemType) {
-        default:
-        case 0: {
-            this.sprite = 'images/gem-orange.png';
-            break;
-        }
-        case 1: {
-            this.sprite = 'images/gem-green.png';
-            break;
-        }
-        case 2: {
-            this.sprite = 'images/gem-blue.png';
-            break;
-        }
+        this.sprite = 'images/gem-blue.png';
     }
 
     // go to sleep for a while
@@ -359,20 +357,22 @@ Gem.prototype.awaken = function() {
         // is it an empty grid square? if so, claim it and stop looking.
         // make sure the player is not on that square, nor any gems
         if (player.row == gemRow && player.col == gemCol) {
-        //    console.log('Whoops, the player is already at row ' + player.row
-        //        + ', col ' + player.col);
+
+            // the player's on that square, try again
+            continue;
+
         } else {
-        //    console.log("Cool, the player isn't there. Player is at row " +
-        //        player.row + ', col ' + player.col);
 
             // make sure there are no gems there, either
             // if we find one, continue to iterate
             if (findGem(gemRow, gemCol) === null) {
-                //console.log("Awesome, no other gem is there, either.");
+
+                // no gems found, either, looks like we have our square
                 gemPlaced = true;
                 break;
+
             } else {
-                //console.log("Bummer, there's already a gem there.");
+                // bummer, there's already a gem theres;
                 continue;
             }
         }
